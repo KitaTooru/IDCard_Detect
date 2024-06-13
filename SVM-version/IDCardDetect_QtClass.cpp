@@ -1,4 +1,6 @@
 #include "IDCardDetect_QtClass.h"
+#include <QDir>
+#include <QDebug>
 
 IDCardDetect_QtClass::IDCardDetect_QtClass(QWidget* parent)
     : QMainWindow(parent), currentIndex(-1)
@@ -23,9 +25,13 @@ IDCardDetect_QtClass::IDCardDetect_QtClass(QWidget* parent)
 void IDCardDetect_QtClass::on_pushButton_clicked()
 {
     // 打开文件对话框
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open Images"), "", tr("Image Files (*.png *.jpg *.bmp)"));
-    if (fileNames.isEmpty())
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::ExistingFiles);
+    dialog.setNameFilter(tr("Image Files (*.png *.jpg *.bmp)"));
+    if (dialog.exec() != QDialog::Accepted)
         return;
+
+    QStringList fileNames = dialog.selectedFiles();
 
     // 清空图像列表并重置
     images.clear();
@@ -44,6 +50,7 @@ void IDCardDetect_QtClass::on_pushButton_clicked()
         }
     }
 
+    // 确保图像和路径顺序一致
     if (!images.empty())
     {
         currentIndex = 0;
@@ -73,6 +80,8 @@ void IDCardDetect_QtClass::displayImage(int index)
 {
     if (index < 0 || index >= images.size())
         return;
+
+    qDebug() << "Displaying image at index: " << index;
 
     cv::Mat img = images[index];
     cv::Mat rgbImg;
